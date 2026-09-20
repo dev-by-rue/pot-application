@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+:root {
+  --pot-accent: #4d6b5c;
+  --pot-accent-muted: #6b8578;
+  --pot-amber: #b45309;
+  --pot-amber-soft: #fef3c7;
+  --pot-stone-0: #f3f4f3;
+  --pot-stone-1: #e8ebe9;
+  --pot-ink: #1c2420;
+  --pot-muted: #5c6b64;
+  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+  color: var(--pot-ink);
+  background:
+    linear-gradient(180deg, var(--pot-stone-0) 0%, var(--pot-stone-1) 48%, var(--pot-stone-0) 100%);
+  min-height: 100%;
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+}
+
+.underfunded {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--pot-amber);
+  background: var(--pot-amber-soft);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+}
