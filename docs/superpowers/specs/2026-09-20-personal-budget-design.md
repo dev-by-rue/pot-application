@@ -62,7 +62,9 @@ localStorage key namespace examples: `pot:months:{YYYY-MM}`, `pot:goals`, `pot:m
 
 **Outgoing:** `id`, `name`, `amount`
 
-**Derived (never persisted):** leftover, required/allocated per goal, Discretionary, underfunded flags, deadline-passed flags, exceed-salary message — always from `utils/budget.ts(month, goals)`.
+**Derived (never persisted):** leftover, required/allocated per goal, Discretionary, underfunded flags, deadline-passed flags, exceed-salary message, salary percentages — always from `utils/budget.ts(month, goals)`.
+
+**Percent of salary:** `roundpenny((amount / salary) * 100)` with one decimal place for display (e.g. `32.5%`). Only defined when `salary` is a number `> 0`; otherwise UI omits % (no division by zero).
 
 ### Install commands (not yet in scaffold)
 
@@ -148,13 +150,26 @@ Prototype (React/Lovable) is **layout/UX reference only** — same hierarchy and
 ### Budget tab
 
 - Month chevrons + `YYYY-MM` label; salary input.
-- Summary: Discretionary as hero; allocated long/short with Underfunded badges; standard outgoings total; exceed-salary message when needed.
+- Summary: Discretionary as hero; allocated long/short with Underfunded badges; standard outgoings total **and % of salary** (when salary > 0); exceed-salary message when needed.
 - Empty salary: “Enter your salary to see your Discretionary” (not £0).
+- Entry point: **“View breakdown”** opens the Breakdown sub-view (not a fourth tab).
 - **Pot order:** Essentials → Debts → Subscriptions → Long Term Savings Goals → Short Term Savings Goals → Travel → user-added standard pots.
 - Standard pots: add/rename/remove outgoings; rename pot (including built-in standard names); delete **user-added** pots only (built-ins remain).
 - Savings pots: read-only allocated amount + “Edit in Goals”.
 - Add pot (standard only).
 - Open next month when allowed; helper: carries month forward as editable draft.
+
+### Breakdown sub-view (from Budget)
+
+- Full-screen or sheet pushed from Budget; back returns to Budget. Same viewed month; respects read-only past months.
+- Safe-area insets as for other sheets.
+- When salary is unset or ≤ 0: prompt to enter salary (no bogus percentages).
+- When salary > 0, show in Budget pot order:
+  - Each **standard** pot: £ total of outgoings + % of salary
+  - **Long / Short Term Savings Goals:** £ allocated + % of salary
+  - **Discretionary:** £ + % of salary
+  - Optional header line: overall standard outgoings £ + % (same figure as summary)
+- Percentages are informational only (not editable). Rows should sum to ~100% of salary when leftover ≥ 0 and savings are allocated from leftover; if outgoings exceed salary, standard-pot % may exceed 100% in aggregate — show figures honestly, no forced normalisation.
 
 ### Goals tab
 
@@ -181,11 +196,23 @@ Prototype (React/Lovable) is **layout/UX reference only** — same hierarchy and
 
 Done criterion: each state can be triggered (real localStorage for OK; blocked/missing storage for read-only; failed save path for error; optional small dev-only force control for QA if needed).
 
+## User capabilities (acceptance checklist)
+
+| Capability | Supported |
+|------------|-----------|
+| Enter salary | Yes — Budget salary field |
+| Set Long / Short Term goals with deadlines | Yes — exactly one of each (edit shells; no arbitrary extra goals) |
+| Enter monthly outgoings by category (pots) | Yes |
+| See % of salary taken by outgoings | Yes — summary overall %; Breakdown sub-view per pot / savings / Discretionary |
+| See Discretionary (amount left after outgoings + allocated savings) | Yes — hero on Budget |
+| Work month by month | Yes — navigate, open next, past read-only |
+| View budgeting history | Yes — all months; compare to previous calendar month |
+
 ## Testing & done means
 
-- TDD: write Vitest cases for `utils/budget.ts` before/with implementation — both fixture salaries, deadline-passed full shortfall, leftover ≤ 0, rounding absorption, ratio excess top-up.
+- TDD: write Vitest cases for `utils/budget.ts` before/with implementation — both fixture salaries, deadline-passed full shortfall, leftover ≤ 0, rounding absorption, ratio excess top-up, salary % helpers (including salary unset / ≤ 0).
 - Light store tests optional; full E2E not required this pass.
-- `npm run dev` — all three tabs work at mobile and desktop widths; edits persist across refresh; banner states triggerable; lint and tests pass.
+- `npm run dev` — all three tabs + Breakdown sub-view work at mobile and desktop widths; edits persist across refresh; banner states triggerable; lint and tests pass.
 
 ## Out of scope (this pass)
 
@@ -209,3 +236,4 @@ Auth, Capacitor packaging, bank sync, transactions, charts, multi-user, editing 
 | Past months | Read-only this pass |
 | First run | Seed today, empty pots/salary, goal shells, ratio 60/40 |
 | Pot mutability | Rename any non-savings pot; delete user-added only |
+| Salary % / breakdown | Summary shows outgoings % of salary; Breakdown sub-view from Budget lists each pot (incl. allocated savings) + Discretionary as £ and % |
